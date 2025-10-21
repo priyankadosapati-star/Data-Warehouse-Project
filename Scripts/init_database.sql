@@ -78,6 +78,60 @@ MAINTENANCE varchar(10));
 
 
 ---LOADING DATA DROM CSV FILES TO THE TABLES WE HAVE CREATED ABOVE
+truncate table bronze.crm_cust_info;
+BULK INSERT bronze.crm_cust_info
+FROM 'C:\Users\iampr\Documents\sql-data-warehouse-project\datasets\source_crm\cust_info.csv'
+WITH(
+FIRSTROW=2,
+FIELDTERMINATOR=',',
+TABLOCK
+);
+select count(*) from bronze.crm_cust_info;
+
+truncate table bronze.crm_prd_info;
+BULK INSERT bronze.crm_prd_info
+FROM 'C:\Users\iampr\Documents\sql-data-warehouse-project\datasets\source_crm\prd_info.csv'
+WITH(
+FIRSTROW=2,
+FIELDTERMINATOR=',',
+TABLOCK
+);
+
+truncate table bronze.crm_sales_details;
+BULK INSERT bronze.crm_sales_details
+FROM 'C:\Users\iampr\Documents\sql-data-warehouse-project\datasets\source_crm\sales_details.csv'
+WITH(
+FIRSTROW=2,
+FIELDTERMINATOR=',',
+TABLOCK
+);
+
+truncate table bronze.erp_CUST_AZ12;
+BULK INSERT bronze.erp_CUST_AZ12
+FROM 'C:\Users\iampr\Documents\sql-data-warehouse-project\datasets\source_erp\CUST_AZ12.csv'
+WITH(
+FIRSTROW=2,
+FIELDTERMINATOR=',',
+TABLOCK
+);
+
+truncate table bronze.erp_LOC_A101
+BULK INSERT bronze.erp_LOC_A101
+FROM 'C:\Users\iampr\Documents\sql-data-warehouse-project\datasets\source_erp\LOC_A101.csv'
+WITH(
+FIRSTROW=2,
+FIELDTERMINATOR=',',
+rowterminator='\n',
+TABLOCK
+);
+
+BULK INSERT bronze.erp_LOC_A101
+FROM 'C:\Users\iampr\Documents\sql-data-warehouse-project\datasets\source_erp\LOC_A101.csv'
+WITH(
+FIRSTROW=2,
+FIELDTERMINATOR=',',
+TABLOCK
+);
 
 
 
