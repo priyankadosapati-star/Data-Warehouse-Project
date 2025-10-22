@@ -24,7 +24,7 @@ case
  else 'n/a'
  end cst_gndr,
 cst_create_date
-
+--removing duplicates and null
 from (select
 *,
 row_number() over(partition by cst_id order by cst_create_date desc) flag
