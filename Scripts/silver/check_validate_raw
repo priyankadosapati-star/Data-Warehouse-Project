@@ -29,3 +29,134 @@ where cst_first_name!=trim(cst_first_name)
 
 --to check for the data standardization adn consistency
 select distinct cst_marital_status from silver.crm_cust_info;
+
+
+--to check if there are duplicates adn null in prd_id
+select 
+prd_id,
+count(*)
+from bronze.crm_prd_info
+group by prd_id
+having count(*) >1 and prd_id is null;
+
+--check for invalid date order
+select *
+from bronze.crm_prd_info
+where prd_end_dt < prd_start_dt
+
+--to check spaces
+select 
+sls_ord_num,
+sls_prd_key,
+sls_cust_id,
+sls_order_dt,
+sls_ship_dt,
+sls_due_dt,
+sls_sales,
+sls_quantity,
+sls_price
+FROM bronze.crm_sales_details
+where sls_ord_num!=trim(sls_ord_num)
+
+-- as we are joining with cust and prd tables check all the key and in the those tables are not
+select 
+sls_ord_num,
+sls_prd_key,
+sls_cust_id,
+sls_order_dt,
+sls_ship_dt,
+sls_due_dt,
+sls_sales,
+sls_quantity,
+sls_price
+FROM bronze.crm_sales_details
+where sls_prd_key not in (select prd_key from silver.crm_prd_info)
+
+
+--check for invalid date --then make it null
+select
+sls_order_dt from bronze.crm_sales_details
+where sls_order_dt <=0
+
+--check for invalid date it order dat is > ship date or due date
+select 
+sls_order_dt from bronze.crm_sales_details
+
+where sls_order_dt > sls_ship_dt or sls_order_dt > sls_ship_dt
+
+
+--checking business rule
+select
+sls_sales,
+sls_quantity,
+sls_price from
+bronze.crm_sales_details
+where sls_sales!=sls_quantity*sls_price
+
+--checking any nulls or negative numbers
+select distinct
+sls_sales,
+sls_quantity,
+sls_price from
+bronze.crm_sales_details
+where sls_sales<=0 or sls_quantity<=0 or sls_price<=0
+or sls_sales is null or sls_quantity is null  or sls_price is null
+
+
+--CHECK IF PKEY IS NULL OR 0
+SELECT CID from bronze.erp_CUST_AZ12
+where CID is null 
+
+--checking for invalid date
+select
+CID,
+BDATE,
+GEN
+from bronze.erp_CUST_AZ12
+where BDATE <'1924-01-01' or BDATE> GETDATE()
+
+--to join make checking if cid is not in cust_key
+select 
+case when CID like 'NAS%' then substring(CID,4, Len(CID))
+ELSE CID
+end as CID,
+BDATE,
+GEN
+from bronze.erp_CUST_AZ12
+where case when CID like 'NAS%' then substring(CID,4, Len(CID))
+ELSE CID
+end not in (select cst_key from silver.crm_cust_info)
+
+
+--CHECK DATA CONSISTENCY
+select distinct
+gen 
+from bronze.erp_CUST_AZ12;
+
+--check for extra spaces
+select 
+gen 
+from bronze.erp_CUST_AZ12
+where len(trim(gen))!=len(gen)
+
+
+--as joing cust table checking id not in cuist info
+select 
+cid
+from bronze.erp_loc_a101
+where cid not in (select cst_key from silver.crm_cust_info);
+
+--checking consistency(we should remove extra spaces,null,empty spaces_)
+select distinct
+CNTRY from bronze.erp_loc_a101
+
+--CHECK for unwanted spaces
+select 
+CAT 
+from bronze.erp_px_cat_g1v2
+where trim(CAT)!=CAT -- FOR ALL columns
+
+-- check consistency
+select distinct SUBCAT 
+from bronze.erp_px_cat_g1v2
+
