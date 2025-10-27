@@ -1,0 +1,63 @@
+--Data Integration in Gold ayer
+--joining tables based on the fig in DE notes
+
+    create view as gold.dim_customers as 
+    row_number ()over(partition by cst_id) as customer_key,
+    cst_id as customer_id,
+    cst_key as customer_number,
+    cst_first_name as first_name,
+     cst_lastname as last_name,
+         la.cntry as country
+     cst_marital_status as marital status,
+        case when ci.cst_gndr!='n/a' then ci.cst_gnder
+        else coalesce(ca.gen,'n/a')
+        end as gender,
+        ca.bdate as birthdate,
+           cst_create_date as create date,
+        from silver.crm_cust_info ci
+        left join silver.erp_cust_az12 ca
+        on ci.cst_key=ca.cid
+        left join silver.erp_loc_a101 la
+        on ci.cst_key=la.cid
+
+
+        --joining products
+        create view gold.dim_products as
+        select
+        row_number() over(order by pn.prd_start_dt, pn.prd_key) as product_key
+        pn.prd_id as product_id,
+         pn.prd_key product number,
+         pn.prd_nm product_name,
+        pn.cat_id as category,
+        pc.cat as category_id,
+         pc.subcat as subcategory,
+          pc.maintenance,
+        pn.prd_line as cost ,
+        pn.prd_start_dt as start_date,
+        pr.prd_end_dt 
+       
+        from silver.crm_prd_info pn
+         left join silver.erp_px_cat_g1v2 pc
+         --trying to remove historical data if end date is null then it is current data
+         where prd_end_dt is null
+        
+
+
+
+        ---joing sales
+        create view gold.fact_sales as 
+        select
+        sd.sls_ord_num as order_number,
+        pr.product_key, --removed columns from the sales table adn replaced from customer and product table keys
+        cu.customer_key,--surrogated key
+        sd.sls_order_dt as order_date,
+        sd.sls_ship_dt as shipping_date,
+        sd.sls_due_dt as due_date ,
+        sd.sls_sales sales_amount,
+        sd.sls_quantity as quantity,
+        sd.sls_price as price
+        from silver.crm_sales_details sd
+        left join gold.dim-products pr
+        on sd.sls_prd_key=pr.product_number
+        left join gold.dim_customers cu
+        on sd.sls_cust_id=cu.customer_id
